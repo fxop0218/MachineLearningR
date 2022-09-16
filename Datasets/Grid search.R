@@ -1,6 +1,11 @@
-# k-fold crossvalidation 
-dataset <- read.csv("Social_Network_Ads.csv")
-dataset <- dataset[c("Age","EstimatedSalary", "Purchased")]
+# Grid search
+dataset = read.csv("Social_Network_Ads.csv")
+dataset = dataset[c("Age","EstimatedSalary", "Purchased")]
+
+# Transform into a factor to evite the warning
+dataset$Purchased = factor(dataset$Purchased,
+                           labels = c("No", "Yes"),
+                           levels = c(0,1))
 library(caTools)
 set.seed(123)
 split <- sample.split(dataset$Purchased, SplitRatio = 0.8)
@@ -41,8 +46,19 @@ cv = lapply(folds, function(x){
   accuracy = (cm[1,1]+cm[2,2])/(cm[1,1]+cm[2,2]+cm[1,2]+cm[1,2])
   return(accuracy)
 }) # lapply = aplicar a una lista una acción a todos los valores
-mean(as.numeric(cv))
+accuracy = mean(as.numeric(cv))
 accuracy_sd = sd(as.numeric(cv))
+
+# Aply grid search to find the best parameters
+# library(caret)
+
+classifier = train(form = Purchased ~ .,
+                   data = train_set, method = "svmRadial")
+
+classifier # Show information of the classifier
+
+# Create the model with the best params
+classifier$bestTune
 
 # Visualizar el conjunto de datos
 library(ElemStatLearn)
